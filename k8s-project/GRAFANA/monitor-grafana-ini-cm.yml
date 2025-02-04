@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  grafana.ini: |
+    [panels]
+    disable_sanitize_html = true
+kind: ConfigMap
+metadata:
+  name: monitor-grafana-ini-cm
+  namespace: monitor

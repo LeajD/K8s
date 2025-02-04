@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: project-kafka-lb
+  name: project-kafka-lb
+  namespace: default
+spec:
+  clusterIP:
+  clusterIPs:
+  externalIPs:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: server
+    port: 9092
+    protocol: TCP
+    targetPort: 9092
+  selector:
+    role: kafka
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  forgerock-kafka.conf: |
+    input {
+        kafka {
+        }
+    }
+
+    filter {
+    }
+
+    output {
+    }
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  namespace: default

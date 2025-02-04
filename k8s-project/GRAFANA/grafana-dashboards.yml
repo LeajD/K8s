@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  GroupOverview.json: |- #here put json of dashboard
+  HostOverview.json: |-
+  SystemMonitoring.json: |-
+  Top5Overview.json: |-
+  containers.json: |-
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitor

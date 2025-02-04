@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: project-kafka-1
+  name: project-kafka-1
+  namespace: default
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 
+  clusterIPs:
+  externalIPs:
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: client
+    nodePort: 30581
+    port: 9092
+    protocol: TCP
+    targetPort: 9092
+  selector:
+    app: project-kafka-1
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer: {}

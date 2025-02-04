@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  dhparam.pem: |
+kind: ConfigMap
+metadata:
+  name: project-nginx
+  namespace: default

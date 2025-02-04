@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  ldap.toml: | #here toml config
+kind: ConfigMap
+metadata:
+  name: monitor-grafana-cm
+  namespace: monitor

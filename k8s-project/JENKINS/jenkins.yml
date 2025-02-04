@@ -1,0 +1,62 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: jenkins
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  - port: 50000
+    targetPort: 50000
+    name: connection
+  selector:
+    app: jenkins
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: jenkins
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: jenkins
+        imagePullPolicy: Always
+        image: $AZURE_CR/jenkins-telk:latest
+        ports:
+        - containerPort: 8080
+          name: jenkins
+        - containerPort: 50000
+          name: connection
+        env:
+        - name: JENKINS_OPTS
+          value: "--prefix=/jenkins/"
+        volumeMounts:
+        - name: jenkins-data
+          mountPath: /var/jenkins_home
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: jenkins-data
+        hostPath:
+          path: /data/jenkins
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock

@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  pipelines.yml: |
+        - pipeline.id: 
+          path.config: 
+          pipeline.workers: 
+          pipeline.batch.size: 
+          pipeline.batch.delay: 
+kind: ConfigMap
+metadata:
+  name: logstash-pipe-conf
+  namespace: default

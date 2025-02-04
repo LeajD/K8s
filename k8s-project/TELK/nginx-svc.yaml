@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: project-nginx
+  namespace: default
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 
+  clusterIPs:
+  externalIPs:
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    nodePort: 31339
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    role: project-nginx
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

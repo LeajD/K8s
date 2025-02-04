@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: project-zookeeper-1
+    role: zookeeper
+  name: project-zookeeper-1
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: project-zookeeper-1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: project-zookeeper-1
+        role: zookeeper
+    spec:
+      containers:
+      - env:
+        - name: ZOOKEEPER_CLIENT_PORT
+        - name: ZOOKEEPER_SERVER_ID
+        - name: ZOOKEEPER_SERVERS
+        - name: ZOOKEEPER_SYNC_LIMIT
+        - name: ZOOKEEPER_TICK_TIME
+        - name: ZOOKEEPER_INIT_LIMIT
+        - name: KAFKA_OPTS
+        image: confluentinc/cp-zookeeper:7.0.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 2181
+          timeoutSeconds: 1
+        name: zookeeper
+        ports:
+        - containerPort: 2181
+          protocol: TCP
+        - containerPort: 2888
+          protocol: TCP
+        - containerPort: 3888
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 2181
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/zookeeper/data
+          name: zookeeper-1-data
+        - mountPath: /var/lib/zookeeper/log
+          name: zookeeper-1-log
+      dnsPolicy: ClusterFirst
+      hostname: project-zookeeper-1
+      nodeSelector:
+        kubernetes.io/hostname: ocp-project-elk-1
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /data/project-zookeeper-1/data
+          type: ""
+        name: zookeeper-1-data
+      - hostPath:
+          path: /data/project-zookeeper-1/log
+          type: ""
+        name: zookeeper-1-log

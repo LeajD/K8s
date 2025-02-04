@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-kibana-1
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: project-kibana-1
+      role: kibana
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: project-kibana-1
+        role: kibana
+      name: project-kibana-1
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: ES_JAVA_OPTS
+        - name: ELASTICSEARCH_HOSTS
+        - name: ELAStICSEARCH_PORT
+        image: docker.elastic.co/kibana/kibana:8.12.2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 600
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 1
+        name: kibana
+        ports:
+        - containerPort: 5601
+          name: http
+          protocol: TCP
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/config/cert-tls
+        - mountPath: /usr/share/elasticsearch/config/cert-http
+      dnsPolicy: ClusterFirst
+      hostname: project-kibana-1
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/hostname: 
+      volumes:
+      - name: project-elastic-tls-http
+        secret:
+          secretName: project-elastic-tls-http
+      - name: project-elastic-tls-node
+        secret:
+          secretName: project-elastic-tls-node

@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    role: elastic
+  name: project-elastic-0
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: project-elastic-0
+      role: elastic
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: project-elastic-0
+        role: elastic
+      name: project-elastic-0
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: ES_JAVA_OPTS
+          value: -Xms14g -Xmx14g -Dlog4j2.formatMsgNoLookups=true
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: elastic_pass
+              name: project-elastic
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: transport
+          timeoutSeconds: 1
+        name: elastic
+        ports:
+        - containerPort: 9200
+          name: http
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "8"
+          requests:
+            cpu: "1"
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: elastic-0-data
+        - mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          name: project-elastic-ml-cm
+          subPath: elasticsearch.yml
+        - mountPath: /usr/share/elasticsearch/config/cert-http
+          name: project-elastic-tls-http
+        - mountPath: /usr/share/elasticsearch/config/cert-tls
+          name: project-elastic-tls-node
+        - mountPath: /usr/share/elasticsearch/config/cert-notify
+          name: tactical-notify-cert
+        - mountPath: /backup
+          name: project-elastic-backup
+      dnsPolicy: ClusterFirst
+      hostname: project-elastic-0
+      initContainers:
+      - args:
+        - -c
+        - /bin/mkdir -p /usr/share/elasticsearch/data/ ; /bin/chown -R 1000:1000 /usr/share/elasticsearch/data/ ; /bin/mkdir -p /backup ; /bin/chown -R 1000:1000 /backup
+        command:
+        - /bin/sh
+        image: busybox:latest
+        imagePullPolicy: Always
+        name: chmod-data
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: elastic-0-data
+        - mountPath: /backup
+          name: project-elastic-backup
+      nodeSelector:
+        kubernetes.io/hostname: 
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /data/project-elastic-0-test
+          type: ""
+        name: elastic-0-data
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: elasticsearch.yml
+            path: elasticsearch.yml
+          name: project-elastic-ml-cm
+        name: project-elastic-ml-cm
+      - configMap:
+          defaultMode: 420
+          name: tactical-notify-cert
+        name: tactical-notify-cert
+      - hostPath:
+          path: /backup
+          type: ""
+        name: project-elastic-backup
+      - name: project-elastic-tls-http
+        secret:
+          secretName: project-elastic-tls-http
+      - name: project-elastic-tls-node
+        secret:
+          secretName: project-elastic-tls-node

@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: monitor
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: grafana
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - env:
+        - name: GF_SERVER_ROOT_URL
+          value: https://$URL.$COMPANY.com/grafana/
+        - name: GF_AUTH_LDAP_ENABLED
+          value: "true"
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: $PASS
+        - name: PASSWORD
+          value: $PASS
+        - name: USER
+          value: $USER
+        image: grafana/grafana:6.3.2
+        imagePullPolicy: IfNotPresent
+        name: grafana
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/grafana/ldap.toml
+          name: monitor-grafana-cm
+          readOnly: true
+          subPath: ldap.toml
+        - mountPath: /etc/grafana/grafana.ini
+          name: monitor-grafana-ini-cm
+          readOnly: true
+          subPath: grafana.ini
+        - mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+          name: monitor-grafana-datasource-cm
+          readOnly: true
+          subPath: datasource.yaml
+        - mountPath: /etc/grafana/provisioning/dashboards/dashboardproviders.yaml
+          name: monitor-grafana-dashboards-cm
+          readOnly: true
+          subPath: dashboardproviders.yaml
+        - mountPath: /var/lib/grafana/dashboards
+          name: grafana-dashboards
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: monitor-grafana-cm
+        name: monitor-grafana-cm
+      - configMap:
+          defaultMode: 420
+          name: monitor-grafana-ini-cm
+        name: monitor-grafana-ini-cm
+      - configMap:
+          defaultMode: 420
+          name: monitor-grafana-datasource-cm
+        name: monitor-grafana-datasource-cm
+      - configMap:
+          defaultMode: 420
+          name: grafana-dashboards
+        name: grafana-dashboards
+      - configMap:
+          defaultMode: 420
+          name: monitor-grafana-dashboards-cm
+        name: monitor-grafana-dashboards-cm

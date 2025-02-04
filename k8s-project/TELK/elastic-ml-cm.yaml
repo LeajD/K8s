@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  elasticsearch.yml: |
+kind: ConfigMap
+metadata:
+  name: project-elastic-ml-cm
+  namespace: default
