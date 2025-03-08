@@ -1,0 +1,27 @@
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: first-app
+  namespace: staging
+spec:
+  host: first-app
+  subsets:
+    - name: v1
+      labels:
+        app: first-app
+        version: v1
+    - name: v2
+      labels:
+        app: first-app
+        version: v2
+#defines the destination rule for the first-app service.
+# The destination rule specifies the subsets for the service, which are the versions of the service.
+# The subsets are defined by the labels app and version.
+# The destination rule is used by the virtual service to route traffic to the subsets.
+# In this example, the destination rule defines two subsets for the first-app service, v1 and v2.
+# The subsets are defined by the labels app: first-app and version: v1 and app: first-app and version: v2.
+# The virtual service routes traffic to the subsets based on the weights specified in the route section.
+# The route section specifies the destination for the traffic, which is the service and the subset of the service.
+# The weight specifies the percentage of traffic that is routed to the destination.
+# In this example, 100% of the traffic is routed to the v2 subset of the first-app service.

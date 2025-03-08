@@ -1,0 +1,34 @@
+# certificate.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: www
+spec:
+  secretName: www-tls
+  revisionHistoryLimit: 1
+  privateKey:
+    rotationPolicy: Always
+  commonName: www.$DOMAIN_NAME
+  dnsNames:
+    - www.$DOMAIN_NAME
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+---
+#apiVersion: cert-manager.io/v1
+#kind: Certificate
+#metadata:
+#  name: www2
+#  namespace: default
+#spec:
+#  secretName: example-tls  # Secret where the TLS certificate will be stored
+#  issuerRef:
+#    name: letsencrypt-prod  # The name of the ClusterIssuer you created for Let's Encrypt
+#    kind: ClusterIssuer     # Reference to the ClusterIssuer resource
+#  dnsNames:
+#    - domain.com           # The domain for which you are requesting the certificate
+
